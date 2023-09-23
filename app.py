@@ -18,18 +18,18 @@ from datetime import datetime
 import re
 from operator import itemgetter
 from forms import VenueForm
+from models import * 
 
 # ----------------------------------------------------------------------------#
 # App Config.
 # ----------------------------------------------------------------------------#
 
-app = Flask(__name__)
-moment = Moment(app)
-app.config.from_object("config")
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:root@localhost:5432/example'
-# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)
+# app = Flask(__name__)
+# moment = Moment(app)
+# app.config.from_object("config")
+# db = SQLAlchemy(app)
+# migrate = Migrate(app, db)
+
 # TODO: connect to a local postgresql database
 
 # ----------------------------------------------------------------------------#
@@ -37,91 +37,91 @@ migrate = Migrate(app, db)
 # ----------------------------------------------------------------------------#
 
 
-class Genre(db.Model):
-    __tablename__ = "Genre"
+# class Genre(db.Model):
+#     __tablename__ = "Genre"
 
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-
-
-artist_genre_table = db.Table(
-    "artist_genre_table",
-    db.Column("genre_id", db.Integer, db.ForeignKey("Genre.id"), primary_key=True),
-    db.Column("artist_id", db.Integer, db.ForeignKey("Artist.id"), primary_key=True),
-)
-
-venue_genre_table = db.Table(
-    "venue_genre_table",
-    db.Column("genre_id", db.Integer, db.ForeignKey("Genre.id"), primary_key=True),
-    db.Column("venue_id", db.Integer, db.ForeignKey("Venue.id"), primary_key=True),
-)
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.String)
 
 
-class Venue(db.Model):
-    __tablename__ = "Venue"
+# artist_genre_table = db.Table(
+#     "artist_genre_table",
+#     db.Column("genre_id", db.Integer, db.ForeignKey("Genre.id"), primary_key=True),
+#     db.Column("artist_id", db.Integer, db.ForeignKey("Artist.id"), primary_key=True),
+# )
 
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    city = db.Column(db.String(120))
-    state = db.Column(db.String(120))
-    address = db.Column(db.String(120))
-    phone = db.Column(db.String(120))
-    image_link = db.Column(db.String(500))
-    facebook_link = db.Column(db.String(120))
-    website = db.Column(db.String(120))
-    seeking_talent = db.Column(db.Boolean, default=False)
-    seeking_description = db.Column(db.String(120))
-
-    # many to many relationship between Venue and Genre with Venue being the parent table
-    genres = db.relationship(
-        "Genre", secondary=venue_genre_table, backref=db.backref("venues")
-    )
-
-    # one to many relationship between Venue and Shows
-    shows = db.relationship("Show", backref="venue", lazy=True)
-
-    def __repr__(self):
-        return f"<Venue {self.id} {self.name}>"
+# venue_genre_table = db.Table(
+#     "venue_genre_table",
+#     db.Column("genre_id", db.Integer, db.ForeignKey("Genre.id"), primary_key=True),
+#     db.Column("venue_id", db.Integer, db.ForeignKey("Venue.id"), primary_key=True),
+# )
 
 
-class Artist(db.Model):
-    __tablename__ = "Artist"
+# class Venue(db.Model):
+#     __tablename__ = "Venue"
 
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    city = db.Column(db.String(120))
-    state = db.Column(db.String(120))
-    phone = db.Column(db.String(120))
-    # genres = db.Column(db.String(120))
-    image_link = db.Column(db.String(500))
-    facebook_link = db.Column(db.String(120))
-    website = db.Column(db.String(120))
-    seeking_venue = db.Column(db.Boolean, default=False)
-    seeking_description = db.Column(db.String(120))
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.String)
+#     city = db.Column(db.String(120))
+#     state = db.Column(db.String(120))
+#     address = db.Column(db.String(120))
+#     phone = db.Column(db.String(120))
+#     image_link = db.Column(db.String(500))
+#     facebook_link = db.Column(db.String(120))
+#     website = db.Column(db.String(120))
+#     seeking_talent = db.Column(db.Boolean, default=False)
+#     seeking_description = db.Column(db.String(120))
 
-    # many to many
-    genres = db.relationship(
-        "Genre", secondary=artist_genre_table, backref=db.backref("artists")
-    )
+#     # many to many relationship between Venue and Genre with Venue being the parent table
+#     genres = db.relationship(
+#         "Genre", secondary=venue_genre_table, backref=db.backref("venues")
+#     )
 
-    # one to many
-    shows = db.relationship("Show", backref="artist", lazy=True)
+#     # one to many relationship between Venue and Shows
+#     shows = db.relationship("Show", backref="venue", lazy=True)
 
-    def __repr__(self):
-        return f"<Artist {self.id} {self.name}>"
+#     def __repr__(self):
+#         return f"<Venue {self.id} {self.name}>"
 
 
-class Show(db.Model):
-    __tablename__ = "Show"
+# class Artist(db.Model):
+#     __tablename__ = "Artist"
 
-    id = db.Column(db.Integer, primary_key=True)
-    start_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.String)
+#     city = db.Column(db.String(120))
+#     state = db.Column(db.String(120))
+#     phone = db.Column(db.String(120))
+#     # genres = db.Column(db.String(120))
+#     image_link = db.Column(db.String(500))
+#     facebook_link = db.Column(db.String(120))
+#     website = db.Column(db.String(120))
+#     seeking_venue = db.Column(db.Boolean, default=False)
+#     seeking_description = db.Column(db.String(120))
 
-    artist_id = db.Column(db.Integer, db.ForeignKey("Artist.id"), nullable=False)
-    venue_id = db.Column(db.Integer, db.ForeignKey("Venue.id"), nullable=False)
+#     # many to many
+#     genres = db.relationship(
+#         "Genre", secondary=artist_genre_table, backref=db.backref("artists")
+#     )
 
-    def __repr__(self):
-        return f"<Show {self.id} {self.start_time} artist_id={artist_id} venue_id={venue_id}>"
+#     # one to many
+#     shows = db.relationship("Show", backref="artist", lazy=True)
+
+#     def __repr__(self):
+#         return f"<Artist {self.id} {self.name}>"
+
+
+# class Show(db.Model):
+#     __tablename__ = "Show"
+
+#     id = db.Column(db.Integer, primary_key=True)
+#     start_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+#     artist_id = db.Column(db.Integer, db.ForeignKey("Artist.id"), nullable=False)
+#     venue_id = db.Column(db.Integer, db.ForeignKey("Venue.id"), nullable=False)
+
+#     def __repr__(self):
+#         return f"<Show {self.id} {self.start_time} artist_id={artist_id} venue_id={venue_id}>"
 
 
 # ----------------------------------------------------------------------------#
@@ -306,7 +306,7 @@ def show_venue(venue_id):
             "address": venue.address,
             "city": venue.city,
             "state": venue.state,
-            "phone": venue.phone,
+            "phone": (venue.phone[:3] + '-' + venue.phone[3:6] + '-' + venue.phone[6:]),
             "website": venue.website,
             "facebook_link": venue.facebook_link,
             "seeking_talent": venue.seeking_talent,
@@ -434,8 +434,11 @@ def create_venue_submission():
         city = form.city.data.strip()
         state = form.state.data
         address = form.address.data.strip()
-        phone = form.phone.data
-        # phone = re.sub('\D', '', phone)
+        if form.phone.data:
+            phone = form.phone.data
+            phone = re.sub('\D', '', phone)
+        else:
+            flash("Phone number is required")
         genres = form.genres.data
         # print("Seeking talent", form.seeking_talent.data)
         seeking_talent = True if form.seeking_talent.data else False
@@ -602,7 +605,8 @@ def show_artist(artist_id):
         num_upcoming_shows = 0
         now = datetime.now()
 
-        artist_shows = Show.query.filter_by(artist_id=artist_id).all()
+        artist_shows = db.session.query(Show).join(Venue).filter(Show.artist_id==artist_id).all()
+        # artist_shows = Show.query.filter_by(artist_id=artist_id).all()
         for show in artist_shows:
             if show.start_time > now:
               num_upcoming_shows += 1
@@ -627,7 +631,7 @@ def show_artist(artist_id):
             "genres": genres,
             "city": artist.city,
             "state": artist.state,
-            "phone": artist.phone,
+            "phone": (artist.phone[:3] + '-' + artist.phone[3:6] + '-' + artist.phone[6:]),
             "website": artist.website,
             "facebook_link": artist.facebook_link,
             "seeking_venue": artist.seeking_venue,
@@ -743,7 +747,7 @@ def edit_artist(artist_id):
         "genres": genres,
         "city": artist.city,
         "state": artist.state,
-        "phone": artist.phone,
+        "phone": (artist.phone[:3] + '-' + artist.phone[3:6] + '-' + artist.phone[6:]),
         "website": artist.website,
         "facebook_link": artist.facebook_link,
         "seeking_venue": artist.seeking_venue,
@@ -781,8 +785,11 @@ def edit_artist_submission(artist_id):
         # print('Name ', form.name.data)
         city = form.city.data.strip()
         state = form.state.data
-        phone = form.phone.data
-        # phone = re.sub('\D', '', phone)
+        if form.phone.data:
+            phone = form.phone.data
+            phone = re.sub('\D', '', phone)
+        else:
+            flash("Phone number is required")
         genres = form.genres.data
         # print("Seeking talent", form.seeking_talent.data)
         seeking_venue = True if form.seeking_venue.data else False
@@ -865,7 +872,7 @@ def edit_venue(venue_id):
         "address": venue.address,
         "city": venue.city,
         "state": venue.state,
-        "phone": venue.phone,
+        "phone": (venue.phone[:3] + '-' + venue.phone[3:6] + '-' + venue.phone[6:]),
         "website": venue.website,
         "facebook_link": venue.facebook_link,
         "seeking_talent": venue.seeking_talent,
@@ -905,8 +912,11 @@ def edit_venue_submission(venue_id):
         city = form.city.data.strip()
         state = form.state.data
         address = form.address.data.strip()
-        phone = form.phone.data
-        # phone = re.sub('\D', '', phone)
+        if form.phone.data:
+            phone = form.phone.data
+            phone = re.sub('\D', '', phone)
+        else:
+            flash("Phone number is required")
         genres = form.genres.data
         # print("Seeking talent", form.seeking_talent.data)
         seeking_talent = True if form.seeking_talent.data else False
@@ -990,7 +1000,11 @@ def create_artist_submission():
         name = form.name.data.strip()
         city = form.city.data.strip()
         state = form.state.data
-        phone = form.phone.data
+        if form.phone.data:
+            phone = form.phone.data
+            phone = re.sub('\D', '', phone)
+        else:
+            flash("Phone number is required")
         genres = form.genres.data                   
         seeking_venue = True if form.seeking_venue.data else False
         seeking_description = form.seeking_description.data.strip()
