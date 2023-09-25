@@ -280,7 +280,8 @@ def show_venue(venue_id):
         num_upcoming_shows = 0
         now = datetime.now()
 
-        venue_shows = Show.query.filter_by(venue_id=venue_id).all()
+        venue_shows = db.session.query(Show).join(Venue).filter(Show.venue_id==venue_id).all()
+        # venue_shows = Show.query.filter_by(venue_id=venue_id).all()
         for show in venue_shows:
             if show.start_time > now:
               num_upcoming_shows += 1
